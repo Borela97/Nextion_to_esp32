@@ -71,7 +71,6 @@ bool ESPNexUpload::_searchBaudrate(uint32_t baudrate) {
   dbSerialPrint(F("init nextion serial interface on baudrate: "));
   dbSerialPrintln(baudrate);
 
-  nexSerialBegin(baudrate);
   _printInfoLine(F("ESP baudrate established, try to connect to display"));
   const char _nextion_FF_FF[3] = {0xFF, 0xFF, 0x00};
 
@@ -223,7 +222,6 @@ bool ESPNexUpload::_setPrepareForFirmwareUpdate(uint32_t upload_baudrate) {
   // command forced the ESP to wait until the 'transmit buffer' is empty
   nexSerial.flush();
 
-  nexSerialBegin(upload_baudrate);
   _printInfoLine(F("changing upload baudrate..."));
   _printInfoLine(String(upload_baudrate));
 
