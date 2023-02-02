@@ -57,6 +57,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include "NexHardware.h"
+#include <StreamString.h>
 /**
  * @addtogroup CoreAPI 
  * @{ 
