@@ -137,7 +137,7 @@ void ESPNexUpload::sendCommand(const char *cmd, bool tail, bool null_head) {
 }
 
 uint16_t ESPNexUpload::receiveRetString(String &response, uint32_t timeout,
-                                     bool recv_flag) {
+                                        bool recv_flag) {
 #if defined ESP8266
   yield();
 #endif
@@ -362,8 +362,8 @@ void ESPNexUpload::_setRunningMode(void) {
 bool ESPNexUpload::_echoTest(String input) {
   String cmd = String("");
 
-  char response[input.length()];
-
+  String response = String("");
+  // [input.length()];
   cmd = "prints \"p" + input;
   cmd += "\"";
   cmd += ",";
@@ -375,7 +375,7 @@ bool ESPNexUpload::_echoTest(String input) {
 
   response[input.length()] = '\0';
 
-  return strcmp(response, input.c_str()) == 0;
+  return strcmp(response.c_str(), input.c_str()) == 0;
 }
 
 bool ESPNexUpload::_handlingSleepAndDim(void) {
