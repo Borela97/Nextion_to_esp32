@@ -53,8 +53,10 @@
 #ifndef __ESPNEXUPLOAD_H__
 #define __ESPNEXUPLOAD_H__
 #include <functional>
-#include "NexConfig.h"
-
+#include <Arduino.h>
+#include <SPI.h>
+#include <SD.h>
+#include "NexHardware.h"
 /**
  * @addtogroup CoreAPI 
  * @{ 
