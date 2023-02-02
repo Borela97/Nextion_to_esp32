@@ -77,7 +77,7 @@ bool ESPNexUpload::_searchBaudrate(uint32_t baudrate) {
   this->sendCommand("DRAKJHSUYDGBNCJHGJKSHBDN");
   this->sendCommand("", true, true);  // 0x00 0xFF 0xFF 0xFF
 
-  this->recvRetString(response);
+  this->receiveRetString(response);
   if (response[0] != 0x1A) {
     _printInfoLine(F("first indication that baudrate is wrong"));
   } else {
@@ -88,7 +88,7 @@ bool ESPNexUpload::_searchBaudrate(uint32_t baudrate) {
 
   this->sendCommand("connect");  // first connect attempt
 
-  this->recvRetString(response);
+  this->receiveRetString(response);
   if (response.indexOf(F("comok")) == -1) {
     _printInfoLine(F("display doesn't accept the first connect request"));
   } else {
@@ -101,7 +101,7 @@ bool ESPNexUpload::_searchBaudrate(uint32_t baudrate) {
   this->sendCommand(_nextion_FF_FF, false);
 
   this->sendCommand("connect");  // second attempt
-  this->recvRetString(response);
+  this->receiveRetString(response);
   if (response.indexOf(F("comok")) == -1 && response[0] != 0x1A) {
     _printInfoLine(F("display doesn't accept the second connect request"));
     _printInfoLine(F("conclusion, wrong baudrate"));
@@ -136,7 +136,7 @@ void ESPNexUpload::sendCommand(const char *cmd, bool tail, bool null_head) {
   _printSerialData(true, cmd);
 }
 
-uint16_t ESPNexUpload::recvRetString(String &response, uint32_t timeout,
+uint16_t ESPNexUpload::receiveRetString(String &response, uint32_t timeout,
                                      bool recv_flag) {
 #if defined ESP8266
   yield();
@@ -184,7 +184,7 @@ uint16_t ESPNexUpload::recvRetString(String &response, uint32_t timeout,
   _printSerialData(false, response);
 
   // if the exit flag and the ff flag are both not found, than there is a
-  // timeout if(!exit_flag && !ff_flag) _printInfoLine(F("recvRetString:
+  // timeout if(!exit_flag && !ff_flag) _printInfoLine(F("receiveRetString:
   // timeout"));
 
   if (ff_flag)
@@ -207,7 +207,7 @@ bool ESPNexUpload::_setPrepareForFirmwareUpdate(uint32_t upload_baudrate) {
   this->sendCommand(cmd.c_str());
   delay(0.1);
 
-  this->recvRetString(response, 800, true);  // normal response time is 400ms
+  this->receiveRetString(response, 800, true);  // normal response time is 400ms
 
   String filesize_str = String(_undownloadByte, 10);
   String baudrate_str = String(upload_baudrate);
@@ -225,7 +225,7 @@ bool ESPNexUpload::_setPrepareForFirmwareUpdate(uint32_t upload_baudrate) {
   _printInfoLine(F("changing upload baudrate..."));
   _printInfoLine(String(upload_baudrate));
 
-  this->recvRetString(response, 800, true);  // normal response time is 400ms
+  this->receiveRetString(response, 800, true);  // normal response time is 400ms
 
   // The Nextion display will, if it's ready to accept data, send a 0x05 byte.
   if (response.indexOf(0x05) != -1) {
@@ -257,7 +257,7 @@ bool ESPNexUpload::upload(const uint8_t *file_buf, size_t buf_size) {
     if (_sent_packets == 4096) {
       // wait for the Nextion to return its 0x05 byte confirming reception and
       // readiness to receive the next packets
-      this->recvRetString(string, 500, true);
+      this->receiveRetString(string, 500, true);
       if (string.indexOf(0x05) != -1) {
         // reset sent packets counter
         _sent_packets = 0;
@@ -371,7 +371,7 @@ bool ESPNexUpload::_echoTest(String input) {
 
   sendCommand(cmd.c_str());
   delay(10);
-  recvRetString(response, input.length() + 1);
+  receiveRetString(response, input.length() + 1);
 
   response[input.length()] = '\0';
 
@@ -387,7 +387,7 @@ bool ESPNexUpload::_handlingSleepAndDim(void) {
   cmd = F("get sleep");
   this->sendCommand(cmd.c_str());
 
-  this->recvRetString(response);
+  this->receiveRetString(response);
 
   if (response[0] != 0x71) {
     statusMessage = F("unknown response from 'get sleep' request");
@@ -406,7 +406,7 @@ bool ESPNexUpload::_handlingSleepAndDim(void) {
   cmd = F("get dim");
   this->sendCommand(cmd.c_str());
 
-  this->recvRetString(response);
+  this->receiveRetString(response);
 
   if (response[0] != 0x71) {
     statusMessage = F("unknown response from 'get dim' request");
