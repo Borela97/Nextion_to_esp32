@@ -9,6 +9,8 @@ bool ESPNexUpload::connect() {
   yield();
 #endif
 
+  uint16_t conter = 0;
+
   dbSerialBegin(115200);
   _printInfoLine(F("serial tests & connect"));
 
@@ -48,9 +50,8 @@ bool ESPNexUpload::prepareUpload(uint32_t file_size) {
 
 uint16_t ESPNexUpload::_getBaudrate(void) {
   _baudrate = 0;
-  uint32_t baudrate_array[8] = {921600, 115200, 19200, 9600,
-                                57600,  38400,  4800,  2400};
-  for (uint8_t i = 0; i < 8; i++) {
+  uint32_t baudrate_array[7] = {115200, 19200, 9600, 57600, 38400, 4800, 2400};
+  for (uint8_t i = 0; i < 7; i++) {
     if (_searchBaudrate(baudrate_array[i])) {
       _baudrate = baudrate_array[i];
       _printInfoLine(F("baudrate determined"));
@@ -209,9 +210,11 @@ bool ESPNexUpload::_setPrepareForFirmwareUpdate(uint32_t upload_baudrate) {
 
   this->receiveRetString(response, 800, true);  // normal response time is 400ms
 
+
   String filesize_str = String(_undownloadByte, 10);
   String baudrate_str = String(upload_baudrate);
   cmd = "whmi-wri " + filesize_str + "," + baudrate_str + ",0";
+
 
   this->sendCommand(cmd.c_str());
 
@@ -222,6 +225,7 @@ bool ESPNexUpload::_setPrepareForFirmwareUpdate(uint32_t upload_baudrate) {
   // command forced the ESP to wait until the 'transmit buffer' is empty
   nexSerial.flush();
 
+  nexSerial.updateBaudRate(upload_baudrate);
   _printInfoLine(F("changing upload baudrate..."));
   _printInfoLine(String(upload_baudrate));
 
@@ -306,12 +310,14 @@ bool ESPNexUpload::upload(Stream &myFile) {
     size_t size = myFile.available();
 
     if (size) {
+
       // read up to 2048 byte into the buffer
       int c =
           myFile.readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
 
       // Write the buffered bytes to the nextion. If this fails, return false.
       if (!this->upload(buff, c)) {
+
         return false;
       } else {
         if (_updateProgressCallback) {
@@ -362,8 +368,8 @@ void ESPNexUpload::_setRunningMode(void) {
 bool ESPNexUpload::_echoTest(String input) {
   String cmd = String("");
 
-  String response = String("");
-  // [input.length()];
+  char response[input.length()];
+
   cmd = "prints \"p" + input;
   cmd += "\"";
   cmd += ",";
@@ -371,11 +377,11 @@ bool ESPNexUpload::_echoTest(String input) {
 
   sendCommand(cmd.c_str());
   delay(10);
-  receiveRetString(response, input.length() + 1);
+  recvRetString(response, input.length() + 1);
 
   response[input.length()] = '\0';
 
-  return strcmp(response.c_str(), input.c_str()) == 0;
+  return strcmp(response, input.c_str()) == 0;
 }
 
 bool ESPNexUpload::_handlingSleepAndDim(void) {
